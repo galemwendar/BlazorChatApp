@@ -10,6 +10,7 @@ namespace BlazorChatApp.Shared
     {
         public string User { get; set; }
         public string Message { get; set; }
+        public DateTime DateTime { get; set; }
 
     }
 }

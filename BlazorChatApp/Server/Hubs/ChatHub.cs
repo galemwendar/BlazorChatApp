@@ -25,7 +25,7 @@ namespace BlazorChatApp.Server.Hubs
         }
 		public async Task SendMessage(DateTime dateTime, string user, string message, string token)
 		{
-			ChatData chatData = new ChatData { User = user, Message = message };
+			ChatData chatData = new ChatData { User = user, Message = message, DateTime = dateTime };
 
 			if (previousChatArchive.Chats.ContainsKey(token))
 			{
@@ -33,7 +33,7 @@ namespace BlazorChatApp.Server.Hubs
 			}
 			else
 			{
-				previousChatArchive.Chats.Add(token, new List<Shared.ChatData> { chatData });
+				previousChatArchive.Chats.Add(token, new List<ChatData> { chatData });
 			}
 
 			await Clients.Group(token).SendAsync("ReceiveMessage", dateTime, user, message);

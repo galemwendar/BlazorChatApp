@@ -48,7 +48,7 @@
 
 		hubConnection.On<DateTime, string, string>("ReceiveMessage", (dateTime, user, message) =>
 		{
-			var encodedMsg = $"[{dateTime.ToShortTimeString()}{user}]: {message}";
+			var encodedMsg = $"[{user} {dateTime.ToShortTimeString()}]: {message}";
 			messages.Add(encodedMsg);
 			StateHasChanged();
 		});

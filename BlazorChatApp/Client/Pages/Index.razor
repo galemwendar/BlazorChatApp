@@ -1,9 +1,41 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+@code {
 
-<h1>Hello, world!</h1>
+		AppState appState = new AppState();
 
-Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+	protected override void OnInitialized()
+	{
+		appState.UserName = AppState.UserName;
+		appState.Rooms.AddRange(AppState.Rooms);
+	}
+
+	private void FormSubmit()
+	{
+		AppState.UserName = appState.UserName;
+		AppState.Rooms = new List<string>();
+		//AppState.Room = appState.Room;
+
+		//string[] splitArray = appState.RoomsCommaSeperated.Split(',');
+
+		//AppState.Rooms.AddRange(splitArray.Select(n => n.Trim()));
+
+		Console.WriteLine("Joining rooms... " + string.Join(',', AppState.Rooms));
+
+		//AppState.RoomsCommaSeperated = appState.RoomsCommaSeperated;
+
+		AppState.AppStateUpdated?.Invoke();
+	}
+	}
+	
+
+
+<EditForm Model="@appState" OnSubmit="FormSubmit" >
+	<label>User Name:</label>
+	<InputText @bind-Value="@appState.UserName" />
+	<br />
+	<button type="submit">Save Name</button>
+</EditForm>
+
+@*<SurveyPrompt Title="How is Blazor working for you?" />*@
