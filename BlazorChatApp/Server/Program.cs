@@ -1,3 +1,4 @@
+using BlazorChatApp.Server.Data;
 using BlazorChatApp.Server.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 
@@ -13,7 +14,7 @@ builder.Services.AddResponseCompression(opts =>
 	opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
 		new[] { "application/octet-stream" });
 });
-
+builder.Services.AddSingleton<PreviousChatArchive>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,7 +1,9 @@
-﻿@page "/room1"
+﻿@page "/{RoomName}"
+@using BlazorChatApp.Shared
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 @implements IDisposable
+@inject HttpClient Http
 
 <div class="form-group">
 	<label>
@@ -27,14 +29,18 @@
 </ul>
 
 @code {
+	[Parameter] public string RoomName { get; set; }
 	private HubConnection hubConnection;
 	private List<string> messages = new List<string>();
 	private string userInput;
 	private string messageInput;
 	DateTime dateTime = DateTime.Now;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnParametersSetAsync()
 	{
+		messages.Clear();
+		userInput = "";
+		messageInput = "";
 		
 		hubConnection = new HubConnectionBuilder()
 			.WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
@@ -48,10 +54,24 @@
 		});
 
 		await hubConnection.StartAsync();
+
+		await hubConnection.SendAsync("JoinRoom", RoomName);
+
+				var previousChats = await Http.GetFromJsonAsync<ChatData[]>($"Chat/{RoomName}");
+
+		if (previousChats != null)
+		{
+			foreach (var previousChat in previousChats)
+			{
+				var encodedMsg = $"{previousChat.User}: {previousChat.Message}";
+				messages.Add(encodedMsg);
+			}
+		}
+
 	}
 
 	Task Send() =>
-		hubConnection.SendAsync("SendMessage",dateTime,userInput, messageInput);
+		hubConnection.SendAsync("SendMessage",dateTime,userInput, messageInput, RoomName);
 
 	public bool IsConnected =>
 		hubConnection.State == HubConnectionState.Connected;

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using BlazorChatApp.Server.Data;
+using BlazorChatApp.Shared;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,33 @@ namespace BlazorChatApp.Server.Hubs
 {
 	public class ChatHub:Hub
 	{
-		public async Task SendMessage(DateTime dateTime, string user, string message)
+		 
+		private readonly PreviousChatArchive previousChatArchive;
+
+		public ChatHub(PreviousChatArchive previousChatArchive)
 		{
-			await Clients.All.SendAsync("ReceiveMessage", dateTime, user, message);
-			Console.WriteLine($"[{dateTime}: {user}] : {message}");
+			this.previousChatArchive = previousChatArchive;
+		}
+
+		public async Task JoinRoom(string token)
+        {
+			await Groups.AddToGroupAsync(Context.ConnectionId, token);
+        }
+		public async Task SendMessage(DateTime dateTime, string user, string message, string token)
+		{
+			ChatData chatData = new ChatData { User = user, Message = message };
+
+			if (previousChatArchive.Chats.ContainsKey(token))
+			{
+				previousChatArchive.Chats[token].Add(chatData);
+			}
+			else
+			{
+				previousChatArchive.Chats.Add(token, new List<Shared.ChatData> { chatData });
+			}
+
+			await Clients.Group(token).SendAsync("ReceiveMessage", dateTime, user, message);
+			Console.WriteLine($"[{token}: {user} {dateTime}] : {message}");
 		}
 
 	}
