@@ -31,16 +31,18 @@
 	private List<string> messages = new List<string>();
 	private string userInput;
 	private string messageInput;
+	DateTime dateTime = DateTime.Now;
 
 	protected override async Task OnInitializedAsync()
 	{
+		
 		hubConnection = new HubConnectionBuilder()
 			.WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
 			.Build();
 
-		hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+		hubConnection.On<DateTime, string, string>("ReceiveMessage", (dateTime, user, message) =>
 		{
-			var encodedMsg = $"{user}: {message}";
+			var encodedMsg = $"[{dateTime.ToShortTimeString()}{user}]: {message}";
 			messages.Add(encodedMsg);
 			StateHasChanged();
 		});
@@ -49,7 +51,7 @@
 	}
 
 	Task Send() =>
-		hubConnection.SendAsync("SendMessage", userInput, messageInput);
+		hubConnection.SendAsync("SendMessage",dateTime,userInput, messageInput);
 
 	public bool IsConnected =>
 		hubConnection.State == HubConnectionState.Connected;
